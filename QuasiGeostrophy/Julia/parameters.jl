@@ -21,7 +21,9 @@ function parameters(;
     Ny = 100,
     dk = 5e-6,
     kₘ = 2e-4,
-    Fr = 0.0   
+    Fr = 0.0
     )             
     return parameters(H, Ly, f₀ , g, Lj, Uj, Ny, dk, kₘ, Fr)
 end
+
+# 1) Added Fr, should probably add this to SW too
