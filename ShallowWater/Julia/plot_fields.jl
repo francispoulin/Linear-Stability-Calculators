@@ -20,7 +20,7 @@ function plot_basic_state(y, U, E, Ly, file)
         )
 
     plt1 = plot(p1, p2, layout = (2,1))    
-    savefig(plt1, "basic_state.png")
+    savefig(plt1, file)
 
 end
 
@@ -46,6 +46,7 @@ end
 
 function plot_1D_fields(k_index, k, Ny, y, σmodes, mode_number, file)
 
+      Ly = params.Ly
       Lx = 2*pi/k;
       Nx = Ny;
       dx = Lx/Nx;
@@ -64,7 +65,7 @@ function plot_1D_fields(k_index, k, Ny, y, σmodes, mode_number, file)
         label = "real",
         xlabel = "y",
         title = "u",
-        xlims = (-Lx/2, Lx/2)
+        xlims = (-Ly/2, Ly/2)
         )
     plot!(
         p1,
