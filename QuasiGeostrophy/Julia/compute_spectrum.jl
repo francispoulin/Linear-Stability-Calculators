@@ -1,8 +1,8 @@
-using LinearAlgebra
+using LinearAlgebra: eigen, sortperm
 
-function compute_spectrum(A, k, params, Nmodes)
+function compute_spectrum(A, B, k, params, Nmodes)
 
-λ_in, λvec_in = eigen(A);
+λ_in, λvec_in = eigen(A,B);
         index = sortperm(imag(λ_in), rev=true);
          λvec = λvec_in[:,index];
             λ = λ_in[index];

@@ -1,15 +1,6 @@
-function plot_basic_state(y, U, Ψ, Ly, file)
+function plot_basic_state(y, dQdy, U, Ψ, Ly, file)
 
     p1 = plot(
-        y, 
-        U,
-        linewidth = 3,
-        label = "U",
-        title = "Velocity",
-        xlims = (-Ly/2, Ly/2)
-        )
-        
-    p2 = plot(
         y, 
         Ψ,
         linewidth = 3,
@@ -19,8 +10,27 @@ function plot_basic_state(y, U, Ψ, Ly, file)
         xlims = (-Ly/2, Ly/2)
         )
 
-    plt1 = plot(p1, p2, layout = (2,1))    
-    savefig(plt1, "basic_state.png")
+    p2 = plot(
+        y, 
+        U,
+        linewidth = 3,
+        label = "U",
+        title = "Velocity",
+        xlims = (-Ly/2, Ly/2)
+        )
+            
+    p3 = plot(
+        y, 
+        dQdy,
+        linewidth = 3,
+        label = "dQ/dy",
+        xlabel = "y",
+        title = "dQ/dy",
+        xlims = (-Ly/2, Ly/2)
+        )
+    
+    plt1 = plot(p1, p2, p3, layout = (3,1))    
+    savefig(plt1, file)
 
 end
 
@@ -34,9 +44,11 @@ function plot_growth_rates(ks, σ, Nmodes, file)
         σ[cnt,:], 
         linewidth = 3,
         label=titles[cnt],
-        title="Growth Rates",
+        title="Growth Rates of QG Model",
         xlabel="k",
-        xlims=(ks[1], ks[end])
+        xlims=(ks[1], ks[end]),
+        xticks=(0:0.25:ks[end]),
+        gridlinewidth=2.0
         )
     end
 
@@ -46,6 +58,7 @@ end
 
 function plot_1D_fields(k_index, k, Ny, y, σmodes, mode_number, file)
 
+      Ly = params.Ly
       Lx = 2*pi/k;
       Nx = Ny;
       dx = Lx/Nx;
@@ -53,56 +66,23 @@ function plot_1D_fields(k_index, k, Ny, y, σmodes, mode_number, file)
     X, Y = meshgrid(x,y)
     
     # Divide eigenvector matrix into specified spaces: u,v,eta.
-    uvec = σmodes[1:Ny+1,        mode_number, k_index];
-    vvec = σmodes[Ny+2:2*Ny+2,   mode_number, k_index];
-    ηvec = σmodes[2*Ny+1:3*Ny+1, mode_number, k_index];
+    ψvec = σmodes[:, mode_number, k_index];
     
-    p1 = plot(
+    plt = plot(
         y, 
-        real(uvec),
+        real(ψvec),
         linewidth = 3, 
         label = "real",
         xlabel = "y",
-        title = "u",
-        xlims = (-Lx/2, Lx/2)
+        title = "Streamfunction",
+        xlims = (-Ly/2, Ly/2)
         )
     plot!(
-        p1,
+        plt,
         y,
         linewidth = 3,
-        imag(uvec),
+        imag(ψvec),
         label = "imag")
-    p2 = plot(
-        y, 
-        real(vvec),
-        linewidth = 3, 
-        label = "real",
-        xlabel = "y",
-        title = "v",
-        xlims = (-Lx/2, Lx/2)
-        )
-    plot!(
-        p2,
-        y,
-        linewidth = 3,
-        imag(vvec),
-        label = "imag")
-    p3 = plot(
-        y, 
-        real(ηvec),
-        linewidth = 3, 
-        label = "real",
-        xlabel = "y",
-        title = "η",
-        xlims = (-Lx/2, Lx/2)
-        )
-    plot!(
-        p3,
-        y,
-        linewidth = 3,
-        imag(vvec),
-        label = "imag")
-    plt = plot(p1, p2, p3, layout = (3,1))   
     savefig(plt, file)
     #display(plt)
     
@@ -110,19 +90,16 @@ end
 
 function plot_2D_fields(k_index, k, Ny, y, σmodes, mode_number, file)
 
+    Ly = params.Ly
     Lx = 2*pi/k;
     Nx = Ny;
     dx = Lx/Nx;
      x = collect(0:dx:Lx+dx/2);
   X, Y = meshgrid(x,y[end:-1:1])
 
-    uvec = σmodes[1:Ny+1,        mode_number, k_index];
-    vvec = σmodes[Ny+2:2*Ny+2,   mode_number, k_index];
-    ηvec = σmodes[2*Ny+1:3*Ny+1, mode_number, k_index];
+    ψvec = σmodes[1:Ny+1,        mode_number, k_index];
 
-    u =     repeat(real(uvec),1,Nx+1).*cos.(k*X) -    repeat(imag(uvec),1,Nx+1).*sin.(k*X);
-    v = -k.*repeat(imag(vvec),1,Nx+1).*cos.(k*X) - k.*repeat(real(vvec),1,Nx+1).*sin.(k*X);
-    η =     repeat(real(ηvec),1,Nx+1).*cos.(k*X) -    repeat(imag(ηvec),1,Nx+1).*sin.(k*X);
+    ψ = repeat(real(ψvec),1,Nx+1).*cos.(k*X) - repeat(imag(ψvec),1,Nx+1).*sin.(k*X);
 
     kwargs = (
         xlabel = "x",
@@ -133,14 +110,11 @@ function plot_2D_fields(k_index, k, Ny, y, σmodes, mode_number, file)
          color = :balance,
       colorbar = true,
           xlim = (    0, Lx),
-         ylim = (y[end], y[1])
+         ylim =  (-Ly/2, Ly/2)
     )
 
-    u_plt = contour(x, y[end:-1:1], u[:, end:-1:1], title="u"; kwargs...)
-    v_plt = contour(x, y[end:-1:1], v[:, end:-1:1], title="v"; kwargs...)
-    η_plt = contour(x, y[end:-1:1], η[:, end:-1:1], title="η"; kwargs...)
+    plt = contour(x, y[end:-1:1], ψ[:, end:-1:1], title="ψ"; kwargs...)
 
-    plt1 = plot(u_plt, v_plt, η_plt, layout = (1,3))
-    savefig(plt1, file)
+    savefig(plt, file)
 
 end

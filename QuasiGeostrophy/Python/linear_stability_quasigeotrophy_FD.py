@@ -21,7 +21,6 @@ Uj = 1.0                           # maximum velocity of jet
 
 method = 'cheb'
 
-
 ## FD2 computes the 2nd-order Finite Difference Operator
 ## ------
 #    matrix on N+1 points (i.e. N intervals)
