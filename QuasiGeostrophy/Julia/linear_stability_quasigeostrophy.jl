@@ -59,5 +59,6 @@ mode_number = 1;
     k_index = sortperm(σ[mode_number,:],rev=true)[1];
           k = ks[k_index]; # pick wavenumber
 
-plot_1D_fields(k_index, k, Ny, y, σmodes, mode_number, "modes_1D.png")
-plot_2D_fields(k_index, k, Ny, y, σmodes, mode_number, "modes_2d.png")
+plot_1D_streamfunction(k_index, k, Ny, y, σmodes, mode_number, "modes_1D_streamfunction.png")
+plot_2D_streamfunction(k_index, k, Ny, y, σmodes, mode_number, "modes_2D_streamfunction.png")
+plot_2D_vorticity(k_index, k, Ny, y, Dy2, σmodes, mode_number, "modes_2D_vorticity.png")
