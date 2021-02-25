@@ -1,30 +1,30 @@
-function build_A(kx,U,E,Dy,Dy2,y,params)
-    U1 = U
-    h1 = E.+params.H
+### Notation
+#   small letters => vectors
+# capital letters => matrices
 
-    # Define Differentiation Matrices for y: FD second order
+function build_A(k, u, η, D, D2, y, params)
 
-    Ny  = length(U1)-1
-    g   = params.g
+    N = params.Ny
+    g = params.g
 
-    #  Define Matrices to set up EVP
-    dU1 = diagm(0=>Dy*U1);
-    dh1 = diagm(0=>Dy*h1);
+    k2 = k^2
+    ik = 1im*k
 
-    F    = diagm(0=>params.f₀.+0*y);
-    #Id    = Matrix{Float64}(I, Ny+1, Ny+1);
-    I    = diagm(0=>ones(Ny+1,1)[:])
-    h1f  = diagm(0=>h1);
+    h = η .+ params.H
 
-    kx2  = kx^2;
-    ikx  = 1im*kx;
-    
+     U = diagm(0 => u)
+     H = diagm(0 => h)
+    dU = diagm(0 => D*u)
+    dH = diagm(0 => D*h)
+     F = diagm(0 => params.f₀ .+ 0*y)
+     I = diagm(0 => ones(N+1))
+
     # Form 1L-RSW Matrix
     #   [u1, v1, h1]
 
-    A = [  diagm(0=>U1)  -F[:,2:Ny].+dU1[:,2:Ny]                  g*I;
-         -F[2:Ny,:]/kx2       diagm(0=>U1[2:Ny])    -g/kx2*Dy[2:Ny,:];
-           diagm(0=>h1)           Dy*h1f[:,2:Ny]         diagm(0=>U1)];
+    A = [  U              -F[:,  2:N] + dU[:,2:N]       g*I;
+          -F[2:N,:]/k2     U[2:N,2:N]              -g/k2*Dy[2:N,:];
+           H            Dy*H[:,  2:N]                     U];
     
     return A
 end

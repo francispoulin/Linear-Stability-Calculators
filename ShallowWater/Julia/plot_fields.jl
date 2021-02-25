@@ -44,7 +44,7 @@ function plot_growth_rates(ks, σ, Nmodes, file)
 
 end
 
-function plot_1D_fields(k_index, k, Ny, y, σmodes, mode_number, file)
+function plot_1D_streamfunction(k_index, k, Ny, y, σmodes, mode_number, file)
 
       Ly = params.Ly
       Lx = 2*pi/k;
@@ -109,7 +109,7 @@ function plot_1D_fields(k_index, k, Ny, y, σmodes, mode_number, file)
     
 end
 
-function plot_2D_fields(k_index, k, Ny, y, σmodes, mode_number, file)
+function plot_2D_streamfunction(k_index, k, Ny, y, σmodes, mode_number, file)
 
     Lx = 2*pi/k;
     Nx = Ny;
@@ -143,5 +143,39 @@ function plot_2D_fields(k_index, k, Ny, y, σmodes, mode_number, file)
 
     plt1 = plot(u_plt, v_plt, η_plt, layout = (1,3))
     savefig(plt1, file)
+
+end
+
+
+function plot_2D_vorticity(k_index, k, Ny, y, Dy2, σmodes, mode_number, file)
+
+    Ly = params.Ly
+    Lx = 2*pi/k;
+    Nx = Ny;
+    dx = Lx/Nx;
+     x = collect(0:dx:Lx+dx/2);
+  X, Y = meshgrid(x,y[end:-1:1])
+
+    uvec = σmodes[1:Ny+1,        mode_number, k_index];
+    vvec = σmodes[Ny+2:2*Ny+2,   mode_number, k_index];
+
+    ζvec = im * k * vvec - Dy * uvec    
+    ζ    = repeat(real(ζvec),1,Nx+1).*cos.(k*X) - repeat(imag(ζvec),1,Nx+1).*sin.(k*X);
+
+    kwargs = (
+        xlabel = "x",
+        ylabel = "y",
+          fill = true,
+        levels = 20,
+     linewidth = 0,
+         color = :balance,
+      colorbar = true,
+          xlim = (    0, Lx),
+         ylim = (y[end], y[1])
+    )
+
+    plt = contour(x, y[end:-1:1], ζ[:, end:-1:1], title="ζ"; kwargs...)
+
+    savefig(plt, file)
 
 end
