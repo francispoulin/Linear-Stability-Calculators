@@ -22,9 +22,9 @@ function build_A(k, u, η, D, D2, y, params)
     # Form 1L-RSW Matrix
     #   [u1, v1, h1]
 
-    A = [  U              -F[:,  2:N] + dU[:,2:N]       g*I;
-          -F[2:N,:]/k2     U[2:N,2:N]              -g/k2*Dy[2:N,:];
-           H            Dy*H[:,  2:N]                     U];
+    A = [  U            (-F+dU)[:, 2:N]       g*I;
+          -F[2:N,:]/k2       U[2:N,2:N]  -g/k2*Dy[2:N,:];
+           H              Dy*H[:,  2:N]         U];
     
     return A
 end
