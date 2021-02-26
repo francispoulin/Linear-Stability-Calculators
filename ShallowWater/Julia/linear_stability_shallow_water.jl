@@ -1,27 +1,28 @@
-using LinearAlgebra
-using Plots
+"""
 
-abstract type AbstractGeometry end
+Linear-Stability-Calculators
+============================
+Repo:      Linear-Stability-Calculators
+Code:      ShallowWater/Julia/linear_stability_shallow_water.jl
+Model:     Rotating Shallow Water
+Geometry:  Cartesian/Spherical
+Structure: Bickley Jet
 
-struct Cartesian <: AbstractGeometry end
-struct Spherical <: AbstractGeometry end
+Nondimensional Parameters
+=========================
+Fr = Froude Number
+Ro = Rossby Number
+
+Created Feb 26, 2021
+By Francis J. Poulin
 
 """
-Cartesian version
-"""
-function test_dispatch(geometry::Cartesian)
-    print("Cartesian")
-end
 
-"""
-Spherical version
-"""
-function test_dispatch(geometry::Spherical)
-    print("Spherical")
-end
+include("src/shallow_water_setup.jl")
 
+geometry = Cartesian()
 
-include("cheb.jl")
+#=
 include("parameters.jl")
 include("geometry.jl")
 include("profile.jl")
@@ -92,3 +93,4 @@ mode_number = 1;
 plot_1D_streamfunction(k_index, k, y, σmodes, mode_number, "modes_1D_streamfunction.png")
 plot_2D_streamfunction(k_index, k, y, σmodes, mode_number, "modes_2D_streamfunction.png")
 plot_2D_vorticity( Dy, k_index, k, y, σmodes, mode_number, "modes_2D_vorticity.png")
+=#
