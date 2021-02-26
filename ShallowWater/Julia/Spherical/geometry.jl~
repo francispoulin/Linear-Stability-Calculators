@@ -2,8 +2,8 @@ function geometry(Ny, Ly, method)
 
     if method=="cheb"
         Dy,y   = cheb(Ny); 
-        y      = y*(0.5*Ly);
-        Dy     = (2/Ly)*Dy;
+        y      = Ly / 2 * y;
+        Dy     = 2 / Ly * Dy;
         Dy2    = Dy*Dy;
         return Dy,Dy2,y
     end

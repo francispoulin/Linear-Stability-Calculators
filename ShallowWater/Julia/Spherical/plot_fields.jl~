@@ -44,9 +44,10 @@ function plot_growth_rates(ks, σ, Nmodes, file)
 
 end
 
-function plot_1D_streamfunction(k_index, k, Ny, y, σmodes, mode_number, file)
+function plot_1D_streamfunction(k_index, k, y, σmodes, mode_number, file)
 
-      Ly = params.Ly
+      Ny = length(y) - 1
+      Ly = params.Lϕ
       Lx = 2*pi/k;
       Nx = Ny;
       dx = Lx/Nx;
@@ -63,9 +64,9 @@ function plot_1D_streamfunction(k_index, k, Ny, y, σmodes, mode_number, file)
         real(uvec),
         linewidth = 3, 
         label = "real",
-        xlabel = "y",
+        xlabel = "ϕ",
         title = "u",
-        xlims = (-Ly/2, Ly/2)
+        xlims = (y[end], y[1])
         )
     plot!(
         p1,
@@ -73,14 +74,13 @@ function plot_1D_streamfunction(k_index, k, Ny, y, σmodes, mode_number, file)
         linewidth = 3,
         imag(uvec),
         label = "imag")
-    p2 = plot(
+    p2 = plot( 
         y, 
         real(vvec),
         linewidth = 3, 
         label = "real",
-        xlabel = "y",
-        title = "v",
-        xlims = (-Lx/2, Lx/2)
+         title = "v",
+        xlims = (y[end], y[1])
         )
     plot!(
         p2,
@@ -93,9 +93,8 @@ function plot_1D_streamfunction(k_index, k, Ny, y, σmodes, mode_number, file)
         real(ηvec),
         linewidth = 3, 
         label = "real",
-        xlabel = "y",
-        title = "η",
-        xlims = (-Lx/2, Lx/2)
+         title = "η",
+        xlims = (y[end], y[1])
         )
     plot!(
         p3,
@@ -109,8 +108,9 @@ function plot_1D_streamfunction(k_index, k, Ny, y, σmodes, mode_number, file)
     
 end
 
-function plot_2D_streamfunction(k_index, k, Ny, y, σmodes, mode_number, file)
+function plot_2D_streamfunction(k_index, k, y, σmodes, mode_number, file)
 
+    Ny = length(y) - 1
     Lx = 2*pi/k;
     Nx = Ny;
     dx = Lx/Nx;
@@ -147,9 +147,10 @@ function plot_2D_streamfunction(k_index, k, Ny, y, σmodes, mode_number, file)
 end
 
 
-function plot_2D_vorticity(k_index, k, Ny, y, Dy2, σmodes, mode_number, file)
+function plot_2D_vorticity(Dy, k_index, k, y, σmodes, mode_number, file)
 
     Ly = params.Ly
+    Ny = length(y) - 1
     Lx = 2*pi/k;
     Nx = Ny;
     dx = Lx/Nx;
