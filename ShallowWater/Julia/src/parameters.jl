@@ -1,28 +1,28 @@
-mutable struct parameters
-      H::Float64            # meters               Physical
-     Ly::Float64            # meters
-     Lϕ::Float64            # radians
-   ϕmin::Float64            # radials         
-   ϕmid::Float64            # radians
-   ϕmax::Float64            # radials         
-      a::Float64            # meters
+mutable struct Parameters{I, F}
+      H::F            # meters               Physical
+     Ly::F            # meters
+     Lϕ::F            # radians
+   ϕmin::F            # radials         
+   ϕmid::F            # radians
+   ϕmax::F            # radials         
+      a::F            # meters
 
-   TwoΩ::Float64            # 1/second             Coriolis
-     f₀::Float64            # 1/second
+   TwoΩ::F            # 1/second             Coriolis
+     f₀::F            # 1/second
 
-      g::Float64            # meters/second^2      Buoyancy
+      g::F            # meters/second^2      Buoyancy
 
-      N::Int64              # Integer              Numerical
+      N::I            # Integer              Numerical
 
-     Lj::Float64            # meters               Jet (specify profile)
-     Uj::Float64            # meters/second
+     Lj::F            # meters               Jet (specify profile)
+     Uj::F            # meters/second
 
-     dk::Float64            # 1/meters             Wavenumbers
-   kmin::Float64            # 1/metres
-   kmax::Float64            # 1/meters
+     dk::F            # 1/meters             Wavenumbers
+   kmin::F            # 1/metres
+   kmax::F            # 1/meters
 
-     Fr::Float64            # Nondimensional       Nondimensional
-     Ro::Float64            # Nondimensional
+     Fr::F            # Nondimensional       Nondimensional
+     Ro::F            # Nondimensional
 end
 
 """
@@ -30,7 +30,7 @@ end
 Cartesian version of parameters function.
 
 """
-function parameters(geometry::Cartesian;
+function Parameters(geometry::Cartesian;
      H = 1,
     Ly = 20,
     Lϕ = nothing,
@@ -56,7 +56,7 @@ function parameters(geometry::Cartesian;
     Fr = 0.0,
     Ro = 0.0
     )
-    return parameters(H, Ly, f₀, g, N, Lj, Uj, N, dk, kmin, kmax, Fr, Ro)
+    return Parameters(H, Ly, f₀, g, N, Lj, Uj, N, dk, kmin, kmax, Fr, Ro)
 end
 
 """
@@ -64,7 +64,7 @@ end
 Spherical version of parameters function.
 
 """
-function parameters(geometry::Spherical;
+function Parameters(geometry::Spherical;
      H = 1,
     Ly = nothing,
     Lϕ =  π/6,
@@ -90,5 +90,5 @@ function parameters(geometry::Spherical;
     Fr = 0.0,
     Ro = 0.0
   )
-  return parameters(H, Lϕ, ϕmin, ϕmid, ϕmax, a, TwoΩ, g, N, Lj, Uj, dk, kmin, kmax, Fr, Ro)
+  return Parameters(H, Lϕ, ϕmin, ϕmid, ϕmax, a, TwoΩ, g, N, Lj, Uj, dk, kmin, kmax, Fr, Ro)
 end

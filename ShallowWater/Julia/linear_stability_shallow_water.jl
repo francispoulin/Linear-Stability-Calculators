@@ -20,7 +20,50 @@ By Francis J. Poulin
 
 include("src/shallow_water_setup.jl")
 
-geometry = Cartesian()
+geometryC = Cartesian()
+geometryS = Spherical()
+
+include("src/Grid.jl")
+include("src/Physics.jl")
+include("src/Basic_States.jl")
+
+gridC = Grid(geometryC; N = 100)
+physC = Physics(geometryC; gridC, β=0.0)
+
+gridS = Grid(geometryS; N = 100)
+physS = Physics(geometryS; gridS, β=0.0)
+
+#=
+
+# Wavenumbers
+  dk = 5e-6                         # 1/meters
+kmax = 2e-4
+  ks = collect(dk:dk:kmax)
+  Nk = length(ks)
+
+        Uj = 1.0                   # meters/second
+   Ljscale = 20                  # meters
+backgroundC = Bickley_Jet(geometryC; gridC, physC, Uj, Ljscale)
+backgroundS = Bickley_Jet(geometryS; gridS, physS, Uj, Ljscale)
+
+fileC = string("basic_state_",typeof(geometryC),".png")
+plot_basic_state(gridC.y, backgroundC, fileC)
+
+fileS = string("basic_state_",typeof(geometryS),".png")
+plot_basic_state(gridS.ϕ, backgroundS, fileS)
+
+# initialize fields to store
+Nmodes = 2
+     σC = zeros(Nmodes, Nk);
+     ωC = zeros(Nmodes, Nk);   
+σmodesC = zeros(ComplexF64, 3*gridC.N+1, Nmodes, Nk);
+
+     σS = zeros(Nmodes, Nk);
+     ωS = zeros(Nmodes, Nk);   
+σmodesS = zeros(ComplexF64, 3*gridS.N+1, Nmodes, Nk);
+=#
+
+#include("src/parameters.jl")
 
 #=
 include("parameters.jl")
