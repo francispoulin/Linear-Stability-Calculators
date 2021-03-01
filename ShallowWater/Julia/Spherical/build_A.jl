@@ -22,8 +22,8 @@ function build_A(k, u, η, D, D2, ϕ, params)
        UxTan = diagm(0=>u./axcos.*sin.(ϕ))
        HoCos = diagm(0=>h./axcos)
        HxCos = diagm(0=>h.*axcos)
-          dU = diagm(0=>Dϕ*u);
-          dH = diagm(0=>Dϕ*h);
+          dU = diagm(0=>D*u);
+          dH = diagm(0=>D*h);
 
     # Form 1L-RSW Matrix
     #   [u1, v1, h1]

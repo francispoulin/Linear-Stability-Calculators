@@ -20,64 +20,44 @@ By Francis J. Poulin
 
 include("src/shallow_water_setup.jl")
 
-geometryC = Cartesian()
-geometryS = Spherical()
-
-include("src/Grid.jl")
-include("src/Physics.jl")
-include("src/Basic_States.jl")
-include("Plotting_Functions.jl")
-
-gridC = Grid(geometryC; N = 100)
-physC = Physics(geometryC; grid=gridC, β=0.0)
-
-gridS = Grid(geometryS; N = 100)
-physS = Physics(geometryS; grid=gridS, β=0.0)
-
-# Wavenumbers
-  dk = 5e-6                         # 1/meters
+# Wavenumbers: Put in a dictionary?
+dk = 2e-5                         # 1/meters
 kmax = 2e-4
-  ks = collect(dk:dk:kmax)
-  Nk = length(ks)
+ks = collect(dk:dk:kmax)
+Nk = length(ks)
+#ksS = ksC * gridC.a /1000
 
-        Uj = 1.0                   # meters/second
-   Ljscale = 20                  # meters
-backgroundC = Bickley_Jet(geometryC; phys=physC, Uj, Ljscale)
-backgroundS = Bickley_Jet(geometryS; phys=physS, Uj, Ljscale)
+Uj = 1.0                      # Jet Parameters
+Ljscale = 20                 
+Nmodes = 2                    # Number of modes to keep
 
-fileC = string("basic_state_",typeof(geometryC),".png")
-plot_basic_state(gridC.y, backgroundC, fileC)
+geometrys = (Cartesian(), Spherical())
+for geometry in geometrys
 
-fileS = string("basic_state_",typeof(geometryS),".png")
-plot_basic_state(gridS.ϕ, backgroundS, fileS)
+     grid = Grid(geometry; N = 100)
+     phys = Physics(geometry; grid=grid, β=0.0)
+     background = Bickley_Jet(geometry; phys=phys, Uj, Ljscale)     # turn into a function?
+  
+     file = string("basic_state_",typeof(geometry),".png")
+     plot_basic_state(grid.y, background, file)
 
-# initialize fields to store
-Nmodes = 2
-     σC = zeros(Nmodes, Nk);
-     ωC = zeros(Nmodes, Nk);   
-σmodesC = zeros(ComplexF64, 3*gridC.N+1, Nmodes, Nk);
+     σ = zeros(Nmodes, Nk);     # Dictionary!!
+     ω = zeros(Nmodes, Nk);   
+     σmodes = zeros(ComplexF64, 3*grid.N+1, Nmodes, Nk);
 
-     σS = zeros(Nmodes, Nk);
-     ωS = zeros(Nmodes, Nk);   
-σmodesS = zeros(ComplexF64, 3*gridS.N+1, Nmodes, Nk);
+     # Put in a parallel for loop and Use dictionarys
+     for (index, k) in enumerate(ks)
+          print("index = $index and k = $k\n")
+          A = build_matrix(geometry; k=k, solution=background, phys=phys)
+          σ[:,index], ω[:,index], σmodes[:,:,index] = compute_spectrum(A, k, phys, Nmodes);
+     end
 
-include("src/Compute_Eigenvalues.jl")
-
-for (index, k) in enumerate(ks)
-     print("index = $index and k = $k\n")
-     AC = Build_Matrix(k=k, solution=backgroundC, phys=physC)
+     file = string("growth_rates_",typeof(geometry),"_Bickley_Jet.png")
+     plot_growth_rates(ks, σ, Nmodes, file)
+            
 end
 
 #=
-# Compute growth rates
-for cnt in 1:Nk
-    local k = ks[cnt]
-    local A = build_A(k, U, E, Dy, y, params);
-    local σ[:,cnt], ω[:,cnt], σmodes[:,:,cnt] = compute_spectrum(A, k, params, Nmodes);
-end
-
-plot_growth_rates(ks, σ, Nmodes, "growth_rates_Cartesian_Bickley_jet.png")
-
 mode_number = 1;
       σ_max = maximum(σ[mode_number,:]);
     k_index = sortperm(σ[mode_number,:],rev=true)[1];

@@ -27,3 +27,24 @@ function plot_basic_state(y, solution, file)
      savefig(plt1, file)
 end
 
+
+function plot_growth_rates(ks, σ, Nmodes, file)
+
+    titles = ["1st mode", "2nd mode"]
+    plt2 = plot()
+    for cnt in 1:Nmodes
+        plot!(plt2, 
+        ks, 
+        σ[cnt,:], 
+        linewidth = 3,
+        label=titles[cnt],
+        title="Growth Rates",
+        xlabel="k",
+        xlims=(ks[1], ks[end])
+        )
+    end
+
+    savefig(plt2,file)
+
+end
+
