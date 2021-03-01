@@ -1,6 +1,7 @@
 using Plots
 using IJulia
 
+# choose y label to be either y or ϕ, depending on the geometry
 function plot_basic_state(y, solution, file)
 
      p1 = plot( 

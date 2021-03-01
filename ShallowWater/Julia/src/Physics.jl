@@ -28,7 +28,7 @@ function Physics(geometry::Cartesian;
 
     coriolis = f₀ .+ β * grid.y 
 
-return Physics(TwoΩ, f₀, β, g, coriolis, Fr, Ro)
+return Physics(grid, TwoΩ, f₀, β, g, coriolis, Fr, Ro)
 end
 
 """
@@ -37,7 +37,7 @@ Spherical version of Physics
 
 """
 function Physics(geometry::Spherical;
-    grid,
+    grid, 
     TwoΩ = 4π/(24*3600),
       f₀ = TwoΩ*sin(grid.ϕmid),
        β = TwoΩ*cos(grid.ϕmid)/grid.a,
@@ -48,6 +48,6 @@ function Physics(geometry::Spherical;
 
     coriolis = TwoΩ * sin.(grid.ϕ) 
 
-return Physics(TwoΩ, f₀, β, g, coriolis, Fr, Ro)
+return Physics(grid, TwoΩ, f₀, β, g, coriolis, Fr, Ro)
 end
 
