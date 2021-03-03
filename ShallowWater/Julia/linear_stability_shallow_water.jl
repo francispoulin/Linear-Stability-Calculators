@@ -6,8 +6,8 @@ Linear-Stability-Calculators: Shallow Water Model
 include("src/shallow_water_setup.jl")
 
              ks = Dict()
-ks[Cartesian()] = collect(2e-5:2e-5:2e-3)
-ks[Spherical()] = collect(2e-5:2e-5:2e-3) * 6.3781e6 * cos(π/4)
+ks[Cartesian()] = collect(2e-5:2e-5:2.5e-3)
+ks[Spherical()] = collect(2e-5:2e-5:2.5e-3) * 6.3781e6 * cos(π/4)
 
         Uj = 1.0                 # Jet Parameters
    Ljscale = 20                 
@@ -24,7 +24,7 @@ for geometry in geometrys
 
      @info string("Setting Geometry = ", geometry)
 
-                    grid = Grid(geometry)
+                    grid = Grid(geometry, N=250)
           phys[geometry] = Physics(geometry; grid=grid)
      background[geometry] = Bickley_Jet(geometry; phys=phys[geometry], Uj, Ljscale)
   
@@ -44,6 +44,7 @@ for geometry in geometrys
      plot_growth_rates(
           ks, 
           σ, 
+          phys,
           geometry, 
           Nmodes, 
           string("growth_rates_",typeof(geometry),"_Bickley_Jet.png")
