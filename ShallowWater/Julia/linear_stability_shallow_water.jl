@@ -50,48 +50,40 @@ for geometry in geometrys
           string("growth_rates_",typeof(geometry),"_Bickley_Jet.png")
           )
      
-          mode_number = 1;
-          σ_max = maximum( σ[(k,geometry)][mode_number] for k in ks[geometry]);
-        k_index = sortperm([σ[(k,geometry)][mode_number] for k in ks[geometry]],rev=true)[1];
-              k = ks[geometry][k_index];
+     mode_number = 1;
+           σ_max = maximum( σ[(k,geometry)][mode_number] for k in ks[geometry]);
+         k_index = sortperm([σ[(k,geometry)][mode_number] for k in ks[geometry]],rev=true)[1];
+               k = ks[geometry][k_index];
 
-          print("σ_max = ",σ_max, " with k = ", k, " at k_index =", k_index, "\n")
-          plot_1D_streamfunction(
-               k_index, 
-               k, 
-               phys, 
-               σmodes, 
-               geometry, 
-               mode_number, 
-               string("modes_1D_streamfunction_",typeof(geometry),".png")
-               )
+     print("σ_max = ",σ_max, " with k = ", k, " at k_index =", k_index, "\n")
+     plot_1D_streamfunction(
+          k_index, 
+          k, 
+          phys, 
+          σmodes, 
+          geometry, 
+          mode_number, 
+          string("modes_1D_streamfunction_",typeof(geometry),".png")
+          )
 
-          plot_2D_streamfunction(
-               k_index, 
-               k, 
-               phys, 
-               σmodes, 
-               geometry,
-               mode_number, 
-               string("modes_2D_streamfunction_",typeof(geometry),".png")
-               )
+     plot_2D_streamfunction(
+          k_index, 
+          k, 
+          phys, 
+          σmodes, 
+          geometry,
+          mode_number, 
+          string("modes_2D_streamfunction_",typeof(geometry),".png")
+          )
 
-          plot_2D_vorticity(
-               phys, 
-               k_index, 
-               k, 
-               σmodes, 
-               geometry,
-               mode_number, 
-               string("modes_2D_vorticity_",typeof(geometry),".png")
-               )
+     plot_2D_vorticity(
+          phys, 
+          k_index, 
+          k, 
+          σmodes, 
+          geometry,
+          mode_number, 
+          string("modes_2D_vorticity_",typeof(geometry),".png")
+          )
 
 end
-
-#=
-plot_1D_streamfunction(k_index, k, y, σmodes, mode_number, "modes_1D_streamfunction.png")
-plot_2D_streamfunction(k_index, k, y, σmodes, mode_number, "modes_2D_streamfunction.png")
-plot_2D_vorticity( Dy, k_index, k, y, σmodes, mode_number, "modes_2D_vorticity.png")
-=#
-
-#string.(fieldnames(typeof(gridC)))

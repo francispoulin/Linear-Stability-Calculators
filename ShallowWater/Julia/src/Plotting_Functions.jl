@@ -1,8 +1,7 @@
+using LinearAlgebra
 using Plots
 using IJulia
 using Printf
-
-using LinearAlgebra
 
 function meshgrid(x, y)
     x = reshape(x, 1, length(x))
@@ -272,3 +271,5 @@ function plot_2D_vorticity(phys, k_index, k, σmodes, geometry, mode_number, fil
     savefig(plt, file)
 
 end
+
+#string.(fieldnames(typeof(gridC)))
