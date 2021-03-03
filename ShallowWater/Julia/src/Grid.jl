@@ -20,10 +20,10 @@ Cartesian version of Grid function.
 """
 function Grid(geometry::Cartesian;
      H = 500.0,
-    Ly = 200e3,
-    Lϕ = 3.135731e-2,
+    Ly = 20e3,
   ϕmid = π/4,
      a = 6.3781e6,
+     Lϕ = Ly/a,
      N = 100
  )
 
@@ -43,10 +43,10 @@ Spherical version of Grid function.
 """
 function Grid(geometry::Spherical;
      H = 500.0,
-    Ly = 200e3,
-    Lϕ = 3.135731e-2,
+    Lϕ = 3.135731e-3,
   ϕmid = π/4,
      a = 6.3781e6,
+     Ly = Lϕ*a,
      N = 100
 )
 

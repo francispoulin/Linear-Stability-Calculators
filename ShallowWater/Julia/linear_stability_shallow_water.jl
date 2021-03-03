@@ -1,68 +1,93 @@
 """
-
-Linear-Stability-Calculators
-============================
-Repo:      Linear-Stability-Calculators
-Code:      ShallowWater/Julia/linear_stability_shallow_water.jl
-Model:     Rotating Shallow Water
-Geometry:  Cartesian/Spherical
-Structure: Bickley Jet
-
-Nondimensional Parameters
-=========================
-Fr = Froude Number
-Ro = Rossby Number
-
-Created Feb 26, 2021
-By Francis J. Poulin
-
+Linear-Stability-Calculators: Shallow Water Model
+=================================================
 """
 
 include("src/shallow_water_setup.jl")
 
-# Wavenumbers: Put in a dictionary?
-dk = 2e-5                         # 1/meters
-kmax = 2e-4
-ks = collect(dk:dk:kmax)
-Nk = length(ks)
-#ksS = ksC * gridC.a /1000
+             ks = Dict()
+ks[Cartesian()] = collect(2e-5:2e-5:2e-3)
+ks[Spherical()] = collect(2e-5:2e-5:2e-3) * 6.3781e6 * cos(π/4)
 
-Uj = 1.0                      # Jet Parameters
-Ljscale = 20                 
-Nmodes = 2                    # Number of modes to keep
+        Uj = 1.0                 # Jet Parameters
+   Ljscale = 20                 
+    Nmodes = 2                    
+         σ = Dict()
+         ω = Dict()
+    σmodes = Dict()
+      phys = Dict()
+background = Dict()
 
-geometrys = (Cartesian(), Spherical())
+geometrys = (Cartesian(), Spherical()) 
+
 for geometry in geometrys
 
-     grid = Grid(geometry; N = 100)
-     phys = Physics(geometry; grid=grid, β=0.0)
-     background = Bickley_Jet(geometry; phys=phys, Uj, Ljscale)     # turn into a function?
+     @info string("Setting Geometry = ", geometry)
+
+                    grid = Grid(geometry)
+          phys[geometry] = Physics(geometry; grid=grid)
+     background[geometry] = Bickley_Jet(geometry; phys=phys[geometry], Uj, Ljscale)
   
-     file = string("basic_state_",typeof(geometry),".png")
-     plot_basic_state(grid.y, background, file)
+     plot_basic_state(
+          grid, 
+          background, 
+          geometry, 
+          string("basic_state_",typeof(geometry),".png")
+          )
 
-     σ = zeros(Nmodes, Nk);     # Dictionary!!
-     ω = zeros(Nmodes, Nk);   
-     σmodes = zeros(ComplexF64, 3*grid.N+1, Nmodes, Nk);
-
-     # Put in a parallel for loop and Use dictionarys
-     for (index, k) in enumerate(ks)
-          print("index = $index and k = $k\n")
-          A = build_matrix(geometry; k=k, solution=background, phys=phys)
-          σ[:,index], ω[:,index], σmodes[:,:,index] = compute_spectrum(A, k, phys, Nmodes);
+     for (index, k) in enumerate(ks[geometry])
+          A = build_matrix(geometry; k, background, phys)
+          σ[(k,geometry)], ω[(k,geometry)], σmodes[(k,geometry)] = compute_spectrum(A, k, phys, Nmodes);
+          @info string("     k = ", k, " and max growth = ", maximum(σ[(k,geometry)]), "\n")
      end
 
-     file = string("growth_rates_",typeof(geometry),"_Bickley_Jet.png")
-     plot_growth_rates(ks, σ, Nmodes, file)
-            
+     plot_growth_rates(
+          ks, 
+          σ, 
+          geometry, 
+          Nmodes, 
+          string("growth_rates_",typeof(geometry),"_Bickley_Jet.png")
+          )
+     
+          mode_number = 1;
+          σ_max = maximum( σ[(k,geometry)][mode_number] for k in ks[geometry]);
+        k_index = sortperm([σ[(k,geometry)][mode_number] for k in ks[geometry]],rev=true)[1];
+              k = ks[geometry][k_index];
+
+          print("σ_max = ",σ_max, " with k = ", k, " at k_index =", k_index, "\n")
+          plot_1D_streamfunction(
+               k_index, 
+               k, 
+               phys, 
+               σmodes, 
+               geometry, 
+               mode_number, 
+               string("modes_1D_streamfunction_",typeof(geometry),".png")
+               )
+
+          plot_2D_streamfunction(
+               k_index, 
+               k, 
+               phys, 
+               σmodes, 
+               geometry,
+               mode_number, 
+               string("modes_2D_streamfunction_",typeof(geometry),".png")
+               )
+
+          plot_2D_vorticity(
+               phys, 
+               k_index, 
+               k, 
+               σmodes, 
+               geometry,
+               mode_number, 
+               string("modes_2D_vorticity_",typeof(geometry),".png")
+               )
+
 end
 
 #=
-mode_number = 1;
-      σ_max = maximum(σ[mode_number,:]);
-    k_index = sortperm(σ[mode_number,:],rev=true)[1];
-          k = ks[k_index]; # pick wavenumber
-
 plot_1D_streamfunction(k_index, k, y, σmodes, mode_number, "modes_1D_streamfunction.png")
 plot_2D_streamfunction(k_index, k, y, σmodes, mode_number, "modes_2D_streamfunction.png")
 plot_2D_vorticity( Dy, k_index, k, y, σmodes, mode_number, "modes_2D_vorticity.png")
