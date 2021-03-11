@@ -17,7 +17,7 @@ params=parameters(
      g = 10, 
     Lj = 1, 
     Uj = 1.0,
-    Ny = 100,
+    Ny = 300,
     dk = 5e-2,
     kₘ = 2
     );

@@ -26,7 +26,7 @@ for geometry in geometrys
 
                     grid = Grid(geometry, N=250)
           phys[geometry] = Physics(geometry; grid=grid)
-     background[geometry] = Bickley_Jet(geometry; phys=phys[geometry], Uj, Ljscale)
+    background[geometry] = Bickley_Jet(geometry; phys=phys[geometry], Uj, Ljscale)
   
      plot_basic_state(
           grid, 
