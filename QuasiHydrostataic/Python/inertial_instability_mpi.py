@@ -6,6 +6,7 @@
  The basic state is that of a barotropic Bickley jet (to be generalized).
  The perturbation is assumed to be periodic in both the zonal (x) and vertical (z) directions.
 
+ Calculations are done in parallel across ks.  See inertial_instability.py for serial execution.
 """
 import numpy as np
 from numpy import linalg as LA
@@ -13,12 +14,10 @@ from mpi4py import MPI
 import matplotlib.pyplot as plt
 import sys
 
-from Parameters import Grid, Physics, Jet, Files
-from Parameters import Output_Parameters, save_spectrum
-
-from Plotting_scripts import plot_growth_slice, plot_growth, plot_modes_1D, plot_modes_2D
-
-from mpi_stuff import scatter_ks, gather_ks, gather_omegas, gather_modes
+from src.Parameters import Grid, Physics, Jet, Files
+from src.Parameters import Output_Parameters, save_spectrum
+from src.Plotting_scripts import plot_growth_slice, plot_growth, plot_modes_1D, plot_modes_2D
+from src.mpi_stuff import scatter_ks, gather_ks, gather_omegas, gather_modes
 
 comm = MPI.COMM_WORLD              
 rank = comm.Get_rank()             
@@ -26,7 +25,7 @@ size = comm.Get_size()
 
 ### Define Parameters
 file    = Files()
-grid    = Grid(Ly = 1000e3, Lz = 3e3, Ny = 100, lat = np.pi/32)
+grid    = Grid(Ly = 1000e3, Lz = 3e3, Ny = 200, lat = np.pi/32)
 physics = Physics(N=1e-2, nu=0.26, kwargs={"lat": grid.lat, "NT": 1})
 jet     = Jet(kwargs={"y": grid.y, "Ly": grid.Ly, "fz": physics.fz, "fy": physics.fy})
 
@@ -76,27 +75,9 @@ for (ik, k) in enumerate(ks_local):
             omegas_local[ik, im, ie] = eigVals[ie]
             modes_local [ik, im, ie] = eigVecs[:,ie]
 
-print("rank = ", rank, "max local real = ", np.amax(omegas_local.real))
-print("rank = ", rank, "max local imag = ", np.amax(omegas_local.imag))
-
-print("rank = ", rank, " omegas_local_real = ", omegas_local.real)
-print("rank = ", rank, " omegas_local_imag = ", omegas_local.imag)
-
 ks     = gather_ks(ks_local, Nk_local, Nk, comm, rank, size)
 omegas = gather_omegas(omegas_local, ks_local, Nk_local, Nk, Nm, Neigs,          comm, rank, size)
 modes  = gather_modes( modes_local,  ks_local, Nk_local, Nk, Nm, Neigs, grid.Ny, comm, rank, size)
-
-if rank == 0:
-    print("shape = ", omegas.shape)
-    print("max global real = ", np.amax(omegas.real))
-    print("max global imag = ", np.amax(omegas.imag))
-    print("rank = ", rank, " omegas_real = ", omegas.real)
-    print("rank = ", rank, " omegas_imag = ", omegas.imag)
-
-#if rank == 0:
-#    print("rank = ", rank, " and shape ks = ", ks.shape)
-#    print("rank = ", rank, " and shape os = ", omegas.shape)
-#    print("rank = ", rank, " and shape ms = ", modes.shape)
 
 if rank == 0:
     save_spectrum(omegas, modes, ks, ms, jet.y, Neigs, grid.Ny, file.nc)
@@ -107,8 +88,6 @@ if rank == 0:
     plot_modes_2D(    file.nc, file.json, file.plotmodes2D, Neigs)
 
 # To-Do
-# -> numba parallel k loop using krange!
-# -> create src directory 
 # -> create: build_A, compute_spectrum, sort perturbation 
 # -> better organize files
 # -> Julia

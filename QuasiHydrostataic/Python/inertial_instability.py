@@ -6,21 +6,21 @@
  The basic state is that of a barotropic Bickley jet (to be generalized).
  The perturbation is assumed to be periodic in both the zonal (x) and vertical (z) directions.
 
+ Calculations are done in serial.  See inertial_instability_mpi.py for parallel execution.
 """
 import numpy as np
 from numpy import linalg as LA
 import matplotlib.pyplot as plt
 import sys
 
-from Parameters import Grid, Physics, Jet, Files
-from Parameters import Output_Parameters, save_spectrum
-
-from Plotting_scripts import plot_growth_slice, plot_growth, plot_modes_1D, plot_modes_2D
+from src.Parameters import Grid, Physics, Jet, Files
+from src.Parameters import Output_Parameters, save_spectrum
+from src.Plotting_scripts import plot_growth_slice, plot_growth, plot_modes_1D, plot_modes_2D
 
 ### Define Parameters
 file    = Files()
 grid    = Grid(Ly = 1000e3, Lz = 3e3, Ny = 200, lat = np.pi/32)
-physics = Physics(N=1e-4, nu=0.26, kwargs={"lat": grid.lat, "NT": 1})
+physics = Physics(N=1e-2, nu=0.26, kwargs={"lat": grid.lat, "NT": 1})
 jet     = Jet(kwargs={"y": grid.y, "Ly": grid.Ly, "fz": physics.fz, "fy": physics.fy})
 
 ### Output Parameters 
@@ -30,8 +30,6 @@ Output_Parameters(grid, physics, jet, file.json)
 Neigs  = 10                            
 dk, Nk = 1e-6, 40
 dm, Nm = 1e-4, 150
-
-ks = np.arange(0.,     Nk*dk,dk)
 
 iks = np.array(range(Nk)) 
 ims = np.array(range(1,Nm+1)) 
@@ -80,8 +78,6 @@ plot_modes_1D(file.nc, file.json, file.plotmodes1D, Neigs)
 plot_modes_2D(file.nc, file.json, file.plotmodes2D, Neigs)
 
 # To-Do
-# -> numba parallel k loop using krange!
-# -> create src directory 
 # -> create: build_A, compute_spectrum, sort perturbation 
 # -> better organize files
 # -> Julia
