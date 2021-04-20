@@ -27,18 +27,16 @@ def scatter_ks(Nk, dk, comm, rank, size):
 
     return ks_local, Nk_local, iks_ends
 
-def gather_spectrum(omegas_local, ks_local, Nk_local, Nk, Nm, Neigs, comm, rank, size):
+def gather_ks(ks_local, Nk_local, Nk, comm, rank, size):
 
     if rank == 0:
-        omegas_real     = np.zeros((Nk, Nm, Neigs), dtype=float)    
-        omegas_imag     = np.zeros((Nk, Nm, Neigs), dtype=float) 
-        Nk_local_input  = Nk_local * Nm * Neigs
-        Nk_local_output = Nk_local * Nm * Neigs
+        ks              = np.zeros((Nk,1), dtype=float)    
+        Nk_local_input  = Nk_local
+        Nk_local_output = Nk_local
         iks_ends_input  = np.insert(np.cumsum(Nk_local_input), 0,0)[0:-1]
         iks_ends_output = np.insert(np.cumsum(Nk_local_output),0,0)[0:-1]
     else:
-        omegas_real     = None
-        omegas_imag     = None
+        ks              = None
         Nk_local_input  = None
         Nk_local_output = None
         iks_ends_input  = None
@@ -47,23 +45,56 @@ def gather_spectrum(omegas_local, ks_local, Nk_local, Nk, Nm, Neigs, comm, rank,
     Nk_local_output = comm.bcast(Nk_local_output, root = 0)
     iks_ends_output = comm.bcast(iks_ends_output, root = 0)
 
-    output1 = np.zeros((Nk_local[rank], Nm, Neigs), dtype=float)
-    output2 = np.zeros((Nk_local[rank], Nm, Neigs), dtype=float)
-
-    for i in range(len(ks_local)):
-        output1[i] = omegas_local[i].real
-        output2[i] = omegas_local[i].imag
-    
     comm.Barrier()
 
-    comm.Gatherv(output1,[omegas_real, Nk_local_output, iks_ends_output, MPI.DOUBLE], root=0)
-    comm.Gatherv(output2,[omegas_imag, Nk_local_output, iks_ends_output, MPI.DOUBLE], root=0)
+    comm.Gatherv(ks_local,[ks, Nk_local_output, iks_ends_output, MPI.DOUBLE], root=0)
+
+    return ks
+
+def gather_omegas(omegas_local, ks_local, Nk_local, Nk, Nm, Neigs, comm, rank, size):
 
     if rank == 0:
-        omegas_real = omegas_real[0:Nk, :]
-        omegas_imag = omegas_imag[0:Nk, :]
-        print("Final data shape %s" %(omegas_real.shape,))
-        print("Final data shape %s" %(omegas_imag.shape,))
+        omegas          = np.zeros((Nk, Nm, Neigs), dtype=complex)    
+        Nk_local_input  = Nk_local * Nm * Neigs
+        Nk_local_output = Nk_local * Nm * Neigs
+        iks_ends_input  = np.insert(np.cumsum(Nk_local_input), 0,0)[0:-1]
+        iks_ends_output = np.insert(np.cumsum(Nk_local_output),0,0)[0:-1]
+    else:
+        omegas          = None
+        Nk_local_input  = None
+        Nk_local_output = None
+        iks_ends_input  = None
+        iks_ends_output = None
 
-    return omegas_real, omegas_imag
+    Nk_local_output = comm.bcast(Nk_local_output, root = 0)
+    iks_ends_output = comm.bcast(iks_ends_output, root = 0)
 
+    comm.Barrier()
+
+    comm.Gatherv(omegas_local,[omegas, Nk_local_output, iks_ends_output, MPI.DOUBLE_COMPLEX], root=0)
+
+    return omegas
+
+def gather_modes(modes_local, ks_local, Nk_local, Nk, Nm, Neigs, Ny, comm, rank, size):
+
+    if rank == 0:
+        modes          = np.zeros((Nk, Nm, Neigs, 3*Ny+1), dtype=complex)    
+        Nk_local_input  = Nk_local * Nm * Neigs * (3 * Ny + 1)
+        Nk_local_output = Nk_local * Nm * Neigs * (3 * Ny + 1)
+        iks_ends_input  = np.insert(np.cumsum(Nk_local_input), 0,0)[0:-1]
+        iks_ends_output = np.insert(np.cumsum(Nk_local_output),0,0)[0:-1]
+    else:
+        modes           = None
+        Nk_local_input  = None
+        Nk_local_output = None
+        iks_ends_input  = None
+        iks_ends_output = None
+
+    Nk_local_output = comm.bcast(Nk_local_output, root = 0)
+    iks_ends_output = comm.bcast(iks_ends_output, root = 0)
+
+    comm.Barrier()
+
+    comm.Gatherv(modes_local,[modes, Nk_local_output, iks_ends_output, MPI.DOUBLE_COMPLEX], root=0)
+
+    return modes

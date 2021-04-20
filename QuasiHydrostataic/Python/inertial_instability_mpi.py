@@ -18,7 +18,7 @@ from Parameters import Output_Parameters, save_spectrum
 
 from Plotting_scripts import plot_growth_slice, plot_growth, plot_modes_1D, plot_modes_2D
 
-from mpi_stuff import scatter_ks, gather_spectrum
+from mpi_stuff import scatter_ks, gather_ks, gather_omegas, gather_modes
 
 comm = MPI.COMM_WORLD              
 rank = comm.Get_rank()             
@@ -26,7 +26,7 @@ size = comm.Get_size()
 
 ### Define Parameters
 file    = Files()
-grid    = Grid(Ly = 1000e3, Lz = 3e3, Ny = 10, lat = np.pi/32)
+grid    = Grid(Ly = 1000e3, Lz = 3e3, Ny = 100, lat = np.pi/32)
 physics = Physics(N=1e-2, nu=0.26, kwargs={"lat": grid.lat, "NT": 1})
 jet     = Jet(kwargs={"y": grid.y, "Ly": grid.Ly, "fz": physics.fz, "fy": physics.fy})
 
@@ -36,9 +36,9 @@ if rank==0:
 
 ### Number of eigenvalues to store and wavenumbers
 Neigs  = 10                            
-dk, Nk = 1e-6, 10 #40
-dm, Nm = 1e-4, 20 #150
-ms     = np.arange(dm, Nm*dm, dm)
+dk, Nk = 1e-6, 40
+dm, Nm = 1e-4, 150
+ms     = dm * np.arange(1,Nm+1,1)
 
 ks_local, Nk_local, iks_ends = scatter_ks(Nk, dk, comm, rank, size)
 
@@ -73,31 +73,30 @@ for (ik, k) in enumerate(ks_local):
 
         # Store spectrum
         for ie in range(Neigs):
-            if rank == 0:
-                omegas_local[ik, im, ie] = eigVals[ie]
-                modes_local [ik, im, ie] = eigVecs[:,ie]
+            omegas_local[ik, im, ie] = eigVals[ie]
+            modes_local [ik, im, ie] = eigVecs[:,ie]
 
-omegas_real, omegas_imag = gather_spectrum(omegas_local, ks_local, Nk_local, Nk, Nm, Neigs, comm, rank, size)
+print("rank = ", rank, "max local real = ", np.amax(omegas_local.real))
+print("rank = ", rank, "max local imag = ", np.amax(omegas_local.imag))
 
-print("rank = ", rank, " and shape = ", omegas_real.shape)
-sys.exit()
+print("rank = ", rank, " omegas_local_real = ", omegas_local.real)
+print("rank = ", rank, " omegas_local_imag = ", omegas_local.imag)
 
-# To-Do
-# -> assign complex omegas array correctly
-# -> generalize gather_spectrum to work for ks (real), omegas (complex), modes (complex)
+ks     = gather_ks(ks_local, Nk_local, Nk, comm, rank, size)
+omegas = gather_omegas(omegas_local, ks_local, Nk_local, Nk, Nm, Neigs,          comm, rank, size)
+modes  = gather_modes( modes_local,  ks_local, Nk_local, Nk, Nm, Neigs, grid.Ny, comm, rank, size)
 
-omegas = np.array((Nk, Nm, Neigs), dtype=complex)
-omegas = omegas_real #+ 1j*omegas_imag
+if rank == 0:
+    print("shape = ", omegas.shape)
+    print("max global real = ", np.amax(omegas.real))
+    print("max global imag = ", np.amax(omegas.imag))
+    print("rank = ", rank, " omegas_real = ", omegas.real)
+    print("rank = ", rank, " omegas_imag = ", omegas.imag)
 
-# Gather to 0
-ks     = np.array(comm.gather(ks_local,     root=0))   
-#omegas = np.array(comm.gather(omegas, root=0))   
-modes  = np.array(comm.gather(modes_local,  root=0))   
-
-if rank == 0:                                    
-    ks     = np.reshape(ks,     Nk)                      
-#    omegas = np.reshape(omegas, (Nk, Nm, Neigs))                      
-    modes  = np.reshape(modes,  (Nk, Nm, Neigs, 3*grid.Ny+1))                      
+#if rank == 0:
+#    print("rank = ", rank, " and shape ks = ", ks.shape)
+#    print("rank = ", rank, " and shape os = ", omegas.shape)
+#    print("rank = ", rank, " and shape ms = ", modes.shape)
 
 if rank == 0:
     save_spectrum(omegas, modes, ks, ms, jet.y, Neigs, grid.Ny, file.nc)

@@ -124,6 +124,7 @@ def save_spectrum(omegas, modes, ks, ms, y, Neigs, Ny, file):
     print("\n--> Saving the spectrum and modal structures in ", file)
 
     ys = np.hstack([y, y[1:-1], y])
+    
     ds = xr.Dataset(
         {
             "omegas_real": (("k","m","i"),      omegas.real),
@@ -132,7 +133,7 @@ def save_spectrum(omegas, modes, ks, ms, y, Neigs, Ny, file):
             "modes_imag":  (("k","m","i","ys"), modes.imag),
             },
         coords={
-            "k":  ks,
+            "k":  ks.flatten(),
             "m":  ms,
             "i":  range(Neigs),
             "ys": ys,

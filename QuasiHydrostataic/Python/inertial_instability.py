@@ -19,29 +19,33 @@ from Plotting_scripts import plot_growth_slice, plot_growth, plot_modes_1D, plot
 
 ### Define Parameters
 file    = Files()
-grid    = Grid(Ly = 1000e3, Lz = 3e3, Ny = 100, lat = np.pi/32)
-physics = Physics(N=1e-3, nu=0.26, kwargs={"lat": grid.lat, "NT": 1})
+grid    = Grid(Ly = 1000e3, Lz = 3e3, Ny = 200, lat = np.pi/32)
+physics = Physics(N=1e-4, nu=0.26, kwargs={"lat": grid.lat, "NT": 1})
 jet     = Jet(kwargs={"y": grid.y, "Ly": grid.Ly, "fz": physics.fz, "fy": physics.fy})
 
 ### Output Parameters 
 Output_Parameters(grid, physics, jet, file.json)
 
 ### Number of eigenvalues to store and wavenumbers
-Neigs = 10                            
-dk, Nk = 1e-6, 50
+Neigs  = 10                            
+dk, Nk = 1e-6, 40
 dm, Nm = 1e-4, 150
 
 ks = np.arange(0.,     Nk*dk,dk)
-ms = np.arange(dm, (Nm+1)*dm,dm)
+
+iks = np.array(range(Nk)) 
+ims = np.array(range(1,Nm+1)) 
+ks  = np.array([dk*ik for ik in iks])      
+ms  = np.array([dm*im for im in ims])      
 
 omegas = np.zeros((Nk, Nm, Neigs),              dtype=complex)
 modes  = np.zeros((Nk, Nm, Neigs, 3*grid.Ny+1), dtype=complex)
 
-### Loop over wavenumbers
 Z, I     = np.zeros((grid.Ny+1, grid.Ny+1)), np.eye(grid.Ny+1)
 Qm, Bym  = np.diag(physics.fz - jet.dU), np.diag(- physics.fy * jet.dU)
 N2       = physics.N**2
 
+### Loop over wavenumbers
 for (ik, k) in enumerate(ks):
     k2 = k**2
     for (im, m) in enumerate(ms):
@@ -77,5 +81,8 @@ plot_modes_2D(file.nc, file.json, file.plotmodes2D, Neigs)
 
 # To-Do
 # -> numba parallel k loop using krange!
+# -> create src directory 
+# -> create: build_A, compute_spectrum, sort perturbation 
+# -> better organize files
 # -> Julia
 # -> 2D eigenvalue problem
