@@ -19,7 +19,7 @@ from src.Plotting_scripts import plot_growth_slice, plot_growth, plot_modes_1D, 
 
 ### Define Parameters
 file    = Files()
-grid    = Grid(Ly = 1000e3, Lz = 3e3, Ny = 200, lat = np.pi/32)
+grid    = Grid(Ly = 1000e3, Lz = 3e3, Ny = 100, lat = np.pi/32)
 physics = Physics(N=1e-2, nu=0.26, kwargs={"lat": grid.lat, "NT": 1})
 jet     = Jet(kwargs={"y": grid.y, "Ly": grid.Ly, "fz": physics.fz, "fy": physics.fy})
 
@@ -27,9 +27,9 @@ jet     = Jet(kwargs={"y": grid.y, "Ly": grid.Ly, "fz": physics.fz, "fy": physic
 Output_Parameters(grid, physics, jet, file.json)
 
 ### Number of eigenvalues to store and wavenumbers
-Neigs  = 10                            
+Neigs  = 1                            
 dk, Nk = 1e-6, 40
-dm, Nm = 1e-4, 150
+dm, Nm = 1e-4, 150 #150
 
 iks = np.array(range(Nk)) 
 ims = np.array(range(1,Nm+1)) 
@@ -37,7 +37,7 @@ ks  = np.array([dk*ik for ik in iks])
 ms  = np.array([dm*im for im in ims])      
 
 omegas = np.zeros((Nk, Nm, Neigs),              dtype=complex)
-modes  = np.zeros((Nk, Nm, Neigs, 3*grid.Ny+1), dtype=complex)
+modes  = np.zeros((Nk, Nm, Neigs, 3*grid.Ny+1), dtype=complex)    # check order of last two
 
 Z, I     = np.zeros((grid.Ny+1, grid.Ny+1)), np.eye(grid.Ny+1)
 Qm, Bym  = np.diag(physics.fz - jet.dU), np.diag(- physics.fy * jet.dU)
@@ -46,10 +46,11 @@ N2       = physics.N**2
 ### Loop over wavenumbers
 for (ik, k) in enumerate(ks):
     k2 = k**2
+    print("ik = ", ik)
     for (im, m) in enumerate(ms):
         m2 = m**2
 
-        Um    = k*np.diag(jet.U,0) - 1j*physics.nu*m2*I
+        Um     = k*np.diag(jet.U,0) - 1j*physics.nu*m2*I
         fyomDy = physics.fy/m*grid.Dy
 
         # Set up eigenvalue problem: [u, v, b]

@@ -25,8 +25,8 @@ size = comm.Get_size()
 
 ### Define Parameters
 file    = Files()
-grid    = Grid(Ly = 1000e3, Lz = 3e3, Ny = 200, lat = np.pi/32)
-physics = Physics(N=1e-2, nu=0.26, kwargs={"lat": grid.lat, "NT": 1})
+grid    = Grid(Ly = 100e3, Lz = 3e3, Ny = 200, lat = np.pi/32)
+physics = Physics(N=1e-3, nu=0.26, kwargs={"lat": grid.lat, "NT": 1})
 jet     = Jet(kwargs={"y": grid.y, "Ly": grid.Ly, "fz": physics.fz, "fy": physics.fy})
 
 ### Output Parameters 
@@ -50,11 +50,9 @@ N2       = physics.N**2
 
 ### Loop over wavenumbers
 for (ik, k) in enumerate(ks_local):
-    k2 = k**2
     for (im, m) in enumerate(ms):
-        m2 = m**2
 
-        Um    = k*np.diag(jet.U,0) - 1j*physics.nu*m2*I
+        Um    = k*np.diag(jet.U,0) - 1j*physics.nu*m**2*I
         fyomDy = physics.fy/m*grid.Dy
 
         # Set up eigenvalue problem: [u, v, b]
