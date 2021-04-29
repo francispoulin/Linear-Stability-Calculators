@@ -1,4 +1,4 @@
-using LinearAlgebra
+using LinearAlgebra: Diagonal, vec
 
 function cheb(N)
     if N==0 

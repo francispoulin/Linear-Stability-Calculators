@@ -25,8 +25,8 @@ size = comm.Get_size()
 
 ### Define Parameters
 file    = Files()
-grid    = Grid(Ly = 100e3, Lz = 3e3, Ny = 200, lat = np.pi/32)
-physics = Physics(N=1e-3, nu=0.26, kwargs={"lat": grid.lat, "NT": 1})
+grid    = Grid(Ly = 1000e3, Lz = 3e3, Ny = 200, lat = np.pi/32)
+physics = Physics(N=1e-2, nu=0.26, kwargs={"lat": grid.lat, "NT": 1})
 jet     = Jet(kwargs={"y": grid.y, "Ly": grid.Ly, "fz": physics.fz, "fy": physics.fy})
 
 ### Output Parameters 
@@ -73,6 +73,8 @@ for (ik, k) in enumerate(ks_local):
             omegas_local[ik, im, ie] = eigVals[ie]
             modes_local [ik, im, ie] = eigVecs[:,ie]
 
+        print("k = ", ks_local[ik], " m = ", ms[im], " growth = ", eigVals[0].imag)
+
 ks     = gather_ks(ks_local, Nk_local, Nk, comm, rank, size)
 omegas = gather_omegas(omegas_local, ks_local, Nk_local, Nk, Nm, Neigs,          comm, rank, size)
 modes  = gather_modes( modes_local,  ks_local, Nk_local, Nk, Nm, Neigs, grid.Ny, comm, rank, size)
@@ -83,7 +85,7 @@ if rank == 0:
     plot_growth_slice(file.nc, file.json, file.plotslicem)
     plot_growth(      file.nc, file.json, file.plotgrowth)
     plot_modes_1D(    file.nc, file.json, file.plotmodes1D, Neigs)
-    plot_modes_2D(    file.nc, file.json, file.plotmodes2D, Neigs)
+    #plot_modes_2D(    file.nc, file.json, file.plotmodes2D, Neigs)
 
 # To-Do
 # -> create: build_A, compute_spectrum, sort perturbation 

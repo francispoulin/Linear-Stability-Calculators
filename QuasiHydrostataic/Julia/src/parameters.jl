@@ -163,7 +163,7 @@ using DataStructures
 
 function save_spectrum(ωs, modes, ks, ms, Neigs, y, Ny, file)
 
-  print("\n--> Saving the spectrum and modal structures in ", file)
+  print("\n--> Saving the spectrum and modal structures in ", file, "\n")
 
   ys = [y; y[2:end-1]; y]
 
@@ -194,10 +194,10 @@ function save_spectrum(ωs, modes, ks, ms, Neigs, y, Ny, file)
   modes_imag = defVar(ds, "uvb_imag", Float64, ("ks", "ms", "ys", "iEigs"), attrib = OrderedDict("units" => "m/s"))
   modes_imag.attrib["comments"] = "imaginary part of modal structure that depend on k, m, ys and iEigs"
 
-  k[:]                   = ks
-  m[:]                   = ms
-  iEig[:]                = collect(1:1:Neigs)
-  y[:]                   = ys
+  k[:]    = ks
+  m[:]    = ms
+  iEig[:] = collect(1:1:Neigs)
+  y[:]    = ys
 
   ωs_real[:, :, :]       = real(ωs)
   ωs_imag[:, :, :]       = imag(ωs)

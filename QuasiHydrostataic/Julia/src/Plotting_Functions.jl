@@ -1,9 +1,8 @@
-using LinearAlgebra
-using Plots, LaTeXStrings, ColorSchemes
+using Plots
+using ColorSchemes
 using Printf
 
 pyplot()
-#gr()
 
 function meshgrid(x, y)
     x = reshape(x, 1, length(x))
@@ -27,12 +26,21 @@ function plot_growth_slice(filenc, filejson, fileplot)
 
     print("\n--> Plotting the growth rates for a fixed k versus m in ", fileplot, "\n")
 
+    growth = zeros(size(ωs))
+    for (ik, k) in enumerate(ks)
+        for (im, m) in enumerate(ms)
+            for iEig in iEigs
+                growth[ik, im, iEig] = max(0, imag(ωs/fz)[ik, im, iEig])
+            end
+        end
+    end
+
     # scaling wavenumber for plotting
     m = L/(2*π)*ms
     plt = plot()
-    for i in collect(1:Neigs)
-        plot!(plt, m, (imag(ωs)/fz)[1,:,i],
-                label = @sprintf("%d", i),
+    for iEig in iEigs
+        plot!(plt, m, growth[1,:,iEig],
+                label = @sprintf("%d", iEig),
             linewidth = 2,
             xlim = (m[1], m[end]),
                xlabel = "L m/(2*π)",
@@ -54,9 +62,9 @@ function plot_growth(filenc, filejson, fileplot)
     # read NetCDF file
     ωs, modes, ks, ms, iEigs, ys = load_spectrum(filenc)
 
-    print("\n--> Plotting the growth rates versus (k, m) in ", fileplot)
+    print("\n--> Plotting the growth rates versus (k, m) in ", fileplot, "\n")
 
-    growth = zeros(size(ωs))
+    growth = zeros(size(ωs)[1:2])
     for (ik, k) in enumerate(ks)
         for (im, m) in enumerate(ms)
             growth[ik, im] = max(0, imag(ωs/fz)[ik, im, 1])
@@ -97,7 +105,7 @@ function plot_modes_1D(filenc, filejson, fileplot, Neigs)
         # read NetCDF file
         ωs, modes, ks, ms, iEigs, ys = load_spectrum(filenc)
     
-        print("\n--> Plotting 1D modes in the file ", fileplot)
+        print("\n--> Plotting 1D modes in the file ", fileplot, "\n")
 
         # scaling wavenumber for plotting
         y = ys[1:Ny+1]
@@ -144,7 +152,7 @@ function plot_modes_2D(filenc, filejson, fileplot, Neigs)
     # read NetCDF file
     ωs, modes, ks, ms, iEigs, ys = load_spectrum(filenc)
 
-    print("\n--> Plotting 2D modes in the file ", fileplot)
+    print("\n--> Plotting 2D modes in the file ", fileplot, "\n")
 
     # scaling wavenumber for plotting
     y = ys[1:Ny+1]
@@ -201,6 +209,7 @@ function plot_modes_2D(filenc, filejson, fileplot, Neigs)
     end
 end
 
+#=
 # choose y label to be either y or ϕ, depending on the geometry
 function plot_basic_state(grid, background, geometry, file)
 
@@ -432,6 +441,7 @@ function plot_2D_vorticity(phys, k_index, k, σmodes, geometry, mode_number, fil
     savefig(plt, file)
 
 end
+=#
 
 #string.(fieldnames(typeof(gridC)))
 

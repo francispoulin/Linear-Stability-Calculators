@@ -1,4 +1,4 @@
-using LinearAlgebra
+using LinearAlgebra: diagm, eigen 
 
 """
 Inertial instability version of build_matrix
