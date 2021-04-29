@@ -54,8 +54,8 @@ ks_local = zeros(Float64, Nk_local[rank+1])
 MPI.Scatterv!(rank == 0 ? VBuffer(ks, Nk_local, iks_ends) : nothing, ks_local, 0, comm)
 #@printf("rank = %s  k_local = %s \n", rank, ks_local)
 
-ωs_local    = zeros(Complex, (Nk_local[rank+1], Nm, Neigs))
-modes_local = zeros(Complex, (Nk_local[rank+1], Nm, 3*grid.Ny+1, Neigs))
+ωs_local    = zeros(Complex{Float64}, (Nk_local[rank+1], Nm, Neigs))
+modes_local = zeros(Complex{Float64}, (Nk_local[rank+1], Nm, 3*grid.Ny+1, Neigs))
 
 for (ik, k) in enumerate(ks_local)
     print("ik = ", ik, "\n")
@@ -67,7 +67,7 @@ for (ik, k) in enumerate(ks_local)
 end
 
 ### Gatter array
-rank == 0 ? ωs = zeros(Complex, (Nk, Nm, Neigs)) : nothing
+rank == 0 ? ωs = zeros(Complex{Float64}, (Nk, Nm, Neigs)) : nothing
 
 rank == 0 ? @printf("rank = %s and size ωs =%s\n", rank, size(ωs)) : nothing
 @printf("rank = %s, size ωs_local = %s\n", rank, size(ωs_local))
