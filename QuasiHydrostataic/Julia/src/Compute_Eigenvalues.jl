@@ -22,7 +22,7 @@ function build_matrix(k, m, grid, physics, jet)
     return A
 end
 
-function compute_spectrum(A, modes, Neigs)
+function compute_spectrum(A, Neigs)
 
     λ_in, λvec_in = eigen(A);
             index = sortperm(imag(λ_in), rev=true);

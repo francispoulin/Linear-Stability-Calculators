@@ -24,7 +24,7 @@ include("src/Compute_Eigenvalues.jl")
 include("src/Plotting_Functions.jl")
 
 files   = Files()
-grid    = Grid(Ly = 1000e3, Lz = 3e3, Ny = 100, θ₀ = π/32, method=Cheb())
+grid    = Grid(Ly = 1000e3, Lz = 3e3, Ny = 10, θ₀ = π/32, method=Cheb())
 physics = Physics(N = 1e-2, ν = 0.26, θ₀ = grid.θ₀, NT = 1)
 jet     = Jet(grid, physics)
 
@@ -46,7 +46,7 @@ for (ik, k) in enumerate(ks)
     for (im, m) in enumerate(ms)
         A = build_matrix(k, m, grid, physics, jet)
 
-        ωs[ik, im, :], modes[ik, im, :, :] = compute_spectrum(A, modes, Neigs)
+        ωs[ik, im, :], modes[ik, im, :, :] = compute_spectrum(A, Neigs)
     end
 end
 
