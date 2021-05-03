@@ -30,7 +30,7 @@ function plot_growth_slice(filenc, filejson, fileplot)
     for (ik, k) in enumerate(ks)
         for (im, m) in enumerate(ms)
             for iEig in iEigs
-                growth[ik, im, iEig] = max(0, imag(ωs/fz)[ik, im, iEig])
+                growth[iEig, im, ik] = max(0, imag(ωs/fz)[iEig, im, ik])
             end
         end
     end
@@ -39,7 +39,7 @@ function plot_growth_slice(filenc, filejson, fileplot)
     m = L/(2*π)*ms
     plt = plot()
     for iEig in iEigs
-        plot!(plt, m, growth[1,:,iEig],
+        plot!(plt, m, growth[iEig, :, 1],
                 label = @sprintf("%d", iEig),
             linewidth = 2,
             xlim = (m[1], m[end]),
@@ -64,10 +64,10 @@ function plot_growth(filenc, filejson, fileplot)
 
     print("\n--> Plotting the growth rates versus (k, m) in ", fileplot, "\n")
 
-    growth = zeros(size(ωs)[1:2])
+    growth = zeros(size(ωs)[2:3])
     for (ik, k) in enumerate(ks)
         for (im, m) in enumerate(ms)
-            growth[ik, im] = max(0, imag(ωs/fz)[ik, im, 1])
+            growth[im, ik] = max(0, imag(ωs/fz)[1, im, ik])
         end
     end
 
@@ -87,7 +87,7 @@ function plot_growth(filenc, filejson, fileplot)
           ylim = (m[1], m[end])
     )
 
-    plt = contour(k, m, growth[:,:,1]', title="Growth rates for 1st mode"; kwargs...)
+    plt = contour(k, m, growth, title="Growth rates for 1st mode"; kwargs...)
     savefig(plt, fileplot)
 end 
 
@@ -115,16 +115,16 @@ function plot_modes_1D(filenc, filejson, fileplot, Neigs)
         ik = 1    # most unstable mode
         
         for iEig in collect(1:Neigs)
-            tmp              = findmax(imag(ωs/fz)[ik, :, iEig])
+            tmp              = findmax(imag(ωs/fz)[iEig, :, ik])
             max_growth, indm = tmp[1], tmp[2]
 
             @printf("\n iEig = %2d  k = %10.6f  m = %10.6f  growth = %10.6f", 
                     iEig, float(k[ik]), float(m[indm]), max_growth)
 
             vvec          = zeros(ComplexF64, Ny+1)
-            uvec          = modes[ik, indm, 1:Ny+1, iEig] 
-            vvec[2:end-1] = modes[ik, indm, Ny+2:2*Ny, iEig]
-            bvec          = modes[ik, indm, 2*Ny+1:3*Ny+1, iEig] 
+            uvec          = modes[1:Ny+1, iEig, indm, ik] 
+            vvec[2:end-1] = modes[Ny+2:2*Ny, iEig, indm, ik]
+            bvec          = modes[2*Ny+1:3*Ny+1, iEig, indm, ik] 
 
             u_plt = plot(y/ L, real(uvec), line=:solid, color=:blue, linewidth=2, label="Re(u)")
             plot!(u_plt, y/ L, imag(uvec), line=:solid, color=:red,  linewidth=2, label="Im(u)")
@@ -133,7 +133,7 @@ function plot_modes_1D(filenc, filejson, fileplot, Neigs)
             b_plt = plot(y/ L, real(bvec), line=:solid, color=:blue, linewidth=2, label="Re(b)")
             plot!(b_plt, y/ L, imag(bvec), line=:solid, color=:red,  linewidth=2, label="Im(b)")
             plt = plot(u_plt, v_plt, b_plt, layout=(3,1), size=(800, 600))  
-            file = string("modes_1D_iEig", iEig, ".png")
+            file = string(fileplot, iEig, ".png")
             savefig(plt, file)
         end
 end
@@ -181,7 +181,7 @@ function plot_modes_2D(filenc, filejson, fileplot, Neigs)
     )
 
     for iEig in collect(1:Neigs)
-        tmp              = findmax(imag(ωs/fz)[ik, :, iEig])
+        tmp              = findmax(imag(ωs/fz)[iEig, :, ik])
         max_growth, indm = tmp[1], tmp[2]
 
         @printf("\n iEig = %2d  k = %10.6f  m = %10.6f  growth = %10.6f", 
@@ -191,9 +191,9 @@ function plot_modes_2D(filenc, filejson, fileplot, Neigs)
         uvec            = zeros(ComplexF64, 1, Ny+1)
         vvec            = zeros(ComplexF64, 1, Ny+1)
         bvec            = zeros(ComplexF64, 1, Ny+1)
-        uvec[1,:]       = modes[ik, indm, 1:Ny+1, iEig] 
-        vvec[1,2:end-1] = modes[ik, indm, Ny+2:2*Ny, iEig]
-        bvec[1,:]       = modes[ik, indm, 2*Ny+1:3*Ny+1, iEig] 
+        uvec[1,:]       = modes[1:Ny+1, iEig, indm, ik] 
+        vvec[1,2:end-1] = modes[Ny+2:2*Ny, iEig, indm, ik]
+        bvec[1,:]       = modes[2*Ny+1:3*Ny+1, iEig, indm, ik] 
 
         # 2D structures
         U = real(repeat(uvec, Nz+1, 1) .* exp.(1im * ms[indm] * Z))
@@ -204,7 +204,7 @@ function plot_modes_2D(filenc, filejson, fileplot, Neigs)
         v_plt = contour(Y/1e3, Z/1e3, V', title="v"; kwargs...)
         b_plt = contour(Y/1e3, Z/1e3, B', title="b"; kwargs...)
         plt = plot(u_plt, v_plt, b_plt, layout=(1,3), size=(1600, 400))  
-        file = string("modes_2D_iEig", iEig, ".png")
+        file = string(fileplot, iEig, ".png")
         savefig(plt, file)
     end
 end

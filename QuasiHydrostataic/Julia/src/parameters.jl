@@ -5,8 +5,8 @@ using Parameters
   json::S        = "data_parameters.json"
   plotgrowth::S   = "growth.png"
   plotslicem::S   = "growth_slice_m.png"
-  plotmodes1D::S  = "growth_modes1D"
-  plotmodes2D::S  = "growth_modes1D"
+  plotmodes1D::S  = "plot_modes1D"
+  plotmodes2D::S  = "plot_modes1D"
 end
 
 @with_kw struct Physics{F, I}
@@ -183,15 +183,15 @@ function save_spectrum(ωs, modes, ks, ms, Neigs, y, Ny, file)
   y    = defVar(ds, "ys",    Float64, ("ys",),    attrib = OrderedDict("units" => "m"))
 
   # Frequencies
-  ωs_real = defVar(ds, "ω_real", Float64, ("ks", "ms", "iEigs"), attrib = OrderedDict("units" => "1/second"))
+  ωs_real = defVar(ds, "ω_real", Float64, ("iEigs", "ms", "ks"), attrib = OrderedDict("units" => "1/second"))
   ωs_real.attrib["comments"] = "frequencies that depend on k, m and iEigs"
-  ωs_imag = defVar(ds, "ω_imag", Float64, ("ks", "ms", "iEigs"), attrib = OrderedDict("units" => "1/second"))
+  ωs_imag = defVar(ds, "ω_imag", Float64, ("iEigs", "ms", "ks"), attrib = OrderedDict("units" => "1/second"))
   ωs_imag.attrib["comments"] = "growth rates that depend on k, m and iEigs"
 
   # Modal Structures: ubv
-  modes_real = defVar(ds, "uvb_real", Float64, ("ks", "ms", "ys", "iEigs"), attrib = OrderedDict("units" => "m/s"))
+  modes_real = defVar(ds, "uvb_real", Float64, ("ys", "iEigs", "ms", "ks"), attrib = OrderedDict("units" => "m/s"))
   modes_real.attrib["comments"] = "real part of modal structure that depend on k, m, ys and iEigs"
-  modes_imag = defVar(ds, "uvb_imag", Float64, ("ks", "ms", "ys", "iEigs"), attrib = OrderedDict("units" => "m/s"))
+  modes_imag = defVar(ds, "uvb_imag", Float64, ("ys", "iEigs", "ms", "ks"), attrib = OrderedDict("units" => "m/s"))
   modes_imag.attrib["comments"] = "imaginary part of modal structure that depend on k, m, ys and iEigs"
 
   k[:]    = ks
@@ -214,7 +214,7 @@ function load_spectrum(file)
   ωs    = ds["ω_real"][:, :, :]      + 1im*ds["ω_imag"][:, :, :]
   modes = ds["uvb_real"][:, :, :, :] + 1im*ds["uvb_imag"][:, :, :, :]
 
-  Ny    = Int((size(modes)[3] - 1)/3)
+  Ny    = Int((size(modes)[1] - 1)/3)
 
   k     = ds["ks"][:]
   m     = ds["ms"][:]
