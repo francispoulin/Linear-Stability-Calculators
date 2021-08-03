@@ -9,19 +9,22 @@ include("build_A.jl")
 include("compute_spectrum.jl")
 include("mesh.jl")
 include("plot_fields.jl")
- 
+
+Omega = 2*π/(24*3600)
+lat   = π/4
+
 params=parameters(
-     H = 1, 
-    Ly = 20, 
-    f₀ = 1, 
+     H = 2e3, 
+    Ly = 600e3, 
+    f₀ = 2*Omega*cos(lat), 
      g = 10, 
-    Lj = 1, 
+    Lj = 60e3, 
     Uj = 1.0,
-    Ny = 300,
+    Ny = 200,
     dk = 5e-2,
-    kₘ = 2
+    kₘ = 2e0
     );
-    
+
 params.Fr = (params.f₀ * params.Lj)^2/(params.g * params.H);
 params.Ro =  params.Uj/(params.f₀ * params.Lj)
 
