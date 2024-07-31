@@ -165,7 +165,7 @@ function plot_modes_2D(filenc, filejson, fileplot, Neigs)
     Nz = Ny
     Lz = 2*π/ms[indm]
     dz = Lz/Nz
-    z = collect(0:dz:Lz)
+    z = collect(0:dz:dz*Nz)
     Y,Z = meshgrid(y, z)
 
     kwargs = (
